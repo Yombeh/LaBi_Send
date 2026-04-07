@@ -266,7 +266,7 @@ export default function ContactPage() {
         </a>
       </section>
 
-      <Footer />
+      <Footer/>
     </main>
   )
 }
