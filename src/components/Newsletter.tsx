@@ -1,16 +1,25 @@
  "use client"
 
 import { useState } from "react"
+import { createClient } from "@/lib/supabase"
 
 export default function Newsletter() {
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
 
-  const handleSubmit = () => {
-    if (email) {
-      setSubmitted(true)
-    }
+const handleSubmit = async () => {
+  if (!email) return
+
+  const response = await fetch("/api/newsletter", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  })
+
+  if (response.ok) {
+    setSubmitted(true)
   }
+}
 
   return (
     <section className="py-24 px-10 bg-[#fdfaf7]">

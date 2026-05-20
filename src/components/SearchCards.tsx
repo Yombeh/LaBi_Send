@@ -1,9 +1,13 @@
 "use client"
-
+import Link from "next/link"
 import { useState } from "react"
 
 export default function SearchCard() {
   const [activeTab, setActiveTab] = useState("connect")
+  const [from, setFrom] = useState("")
+  const [to, setTo] = useState("")
+  const [earliestDate, setEarliestDate] = useState("")
+  const [latestDate, setLatestDate] = useState("")
 
   return (
     <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl mx-auto">
@@ -34,6 +38,8 @@ export default function SearchCard() {
               <input
                 type="text"
                 placeholder="Current location"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm outline-none"
               />
             </div>
@@ -42,6 +48,8 @@ export default function SearchCard() {
               <input
                 type="text"
                 placeholder="Destination"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm outline-none"
               />
             </div>
@@ -52,6 +60,8 @@ export default function SearchCard() {
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Earliest Date</label>
               <input
                 type="date"
+                value={earliestDate}
+                onChange={(e) => setEarliestDate(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm outline-none"
               />
             </div>
@@ -59,14 +69,19 @@ export default function SearchCard() {
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Latest Date</label>
               <input
                 type="date"
+                value={latestDate}
+                onChange={(e) => setLatestDate(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm outline-none"
               />
             </div>
           </div>
 
-          <button className="w-full  gap-2 bg-[#f5c842] text-[#2c4a1e] px-6 py-3 rounded-full font-bold text-sm hover:bg-yellow-400 transition-all">
-            Find Travelers
-          </button>
+          <Link 
+            href={`/trips?from=${from}&to=${to}&earliest=${earliestDate}&latest=${latestDate}`}
+            className="mx-auto flex items-center gap-2 bg-[#f5c842] text-[#2c4a1e] px-6 py-3 rounded-full font-bold text-sm hover:bg-yellow-400 transition-all"
+          >
+            Find Traveller →
+          </Link>
         </div>
       )}
 

@@ -37,10 +37,10 @@ export default function FeaturesSection() {
             </div>
             <div>
               <h3 className="text-lg font-extrabold text-[#2c2c2c] mb-1">
-                Make Payments via Wave or Cash
+                Make Payments via Wave through HexAi
               </h3>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Pay seamlessly through Wave mobile money or hand over cash directly to your traveller. Flexible, simple and secure.
+                Pay seamlessly on wave through HexAi payment gateway. Flexible, simple and secure.
               </p>
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function FeaturesSection() {
   {/* Middle photo */}
   <div className="absolute top-16 right-16 w-64 h-72 rounded-3xl overflow-hidden shadow-2xl border-4 border-white z-10">
     <img
-      src="/gmd.jpeg"
+     src="/wave.webp"
       alt="Feature 2"
       className="w-full h-full object-cover"
     />
@@ -70,7 +70,8 @@ export default function FeaturesSection() {
   {/* Front photo */}
   <div className="absolute bottom-0 left-0 w-64 h-72 rounded-3xl overflow-hidden shadow-2xl border-4 border-white z-20">
     <img
-      src="/paywave.jpg"
+      
+       src="/HexAi.jpeg"
       alt="Feature 3"
       className="w-full h-full object-cover"
     />

@@ -7,7 +7,7 @@ import Newsletter from "@/components/Newsletter"
 import HowItWorks from "@/components/HowItWorks"
 import Footer from "@/components/Footer"
 import Link from "next/link"
-
+import { createClient } from "@/lib/supabase"
 
 const destinations = [
   { 
@@ -36,53 +36,46 @@ const destinations = [
   },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+ 
   return (
     <main className="min-h-screen bg-[#fdfaf7]">
       
       {/* Hero Section */}
-      <section id="home"
-        className="relative h-screen flex flex-col items-center justify-center text-center px-6"
-        style={{
-          backgroundImage: "url('/gemPlane.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center"
-        }}
-      >
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-        
+     <section id="home"
+  className="relative h-[60vh] flex flex-col items-center justify-center px-6"
+  style={{
+    backgroundImage: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/final.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  }}
+>
+      
         <Navbar />
+  {/* Hero Content */}
+  <div className="relative z-10 text-white text-center">
+    <h1 className="text-6xl font-extrabold mb-4 leading-tight">
+      Send Anything, <br />
+      <span className="text-[#f5c842]">Anywhere.</span>
+    </h1>
+     <Link 
+            href= "/become-traveller"
+            className="mx-auto flex items-center gap-2 bg-[#fff6d6] text-[#2c4a1e] px-6 py-3 rounded-full font-bold text-sm hover:bg-yellow-400 transition-all"
+          >
+               Join our traveller network, start earning from your trip now  →
+          </Link>
+  </div>
+</section>    {/* ← closing tag here */}
 
-        {/* Hero Content */}
-               <div className="relative z-10 text-white w-full max-w-6xl mx-auto flex items-center justify-between gap-10">
-  
-                 {/* Left - Text */}
-                  <div className="flex-1">
-                    <h1 className="text-6xl font-extrabold mb-4 leading-tight">
-                       Send Anything, <br />
-                           <span className="text-[#f5c842]">Anywhere.</span>
-                      </h1>
-                          <p className="text-lg mb-6 text-gray-200 max-w-xl">
-                               Connect with travelers heading your way and send packages across borders — fast, affordable, and trusted.
-                            </p>
-                                 <Link href ="/become-traveller" className="mx-auto items-center gap-2 bg-[#f5c842] text-[#2c4a1e] px-6 py-3 rounded-full font-bold text-sm hover:bg-yellow-400 transition-all">
-                                
-                                    Become Traveller
-                                   
-                                    <span>→</span>
-                                  </Link>
-                                          </div>
-
-   {/* Right - Search Card */}
-  <div className="w-[480px] shrink-0">
+{/* Search Card - overlaps hero */}
+<section className="relative z-10 px-6 -mt-16 bg-[#fff6d6]">
+  <div className="max-w-4xl mx-auto">
     <SearchCards />
   </div>
-
-</div></section>
+</section>
 
    {/* Destinations Section */}
-<section className="py-20 px-10 bg-[#fdfaf7]">
+<section className="py-20 px-10 bg-[#fff6d6]">
   
   {/* Section Heading */}
   <div className="max-w-6xl mx-auto mb-14">
@@ -94,10 +87,15 @@ export default function HomePage() {
       while you{" "}
       <span className="bg-[#f5c842] px-2 rounded">stay at ease.</span>
     </p> 
-            <button className=" block mx-auto items-center gap-2 bg-[#155a03] text-[#edf3f8] px-6 py-3 rounded-full font-bold text-sm hover:bg-green-500 transition-all">
-                                     All Destinations 
-            <span>→</span>
-            </button>
+        <div className="flex justify-center">
+     <Link
+    href="/trips"
+    className="inline-flex items-center gap-2 bg-[#155a03] text-[#edf3f8] px-6 py-3 rounded-full font-bold text-sm hover:bg-green-500 transition-all"
+    >
+    All Destinations 
+    <span>→</span>
+    </Link>
+   </div>
   </div>
    
 
@@ -118,7 +116,7 @@ export default function HomePage() {
         />
 
         {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+        <div className="absolute inset-0 bg-black opacity-50 pointer-events-none"></div>
 
         {/* City name */}
         <div className="absolute bottom-4 left-4 text-white">
