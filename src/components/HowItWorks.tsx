@@ -86,7 +86,7 @@ export default function HowItWorks() {
           </div>
 
           {/* CTA */}
-          <Link href="" className="mt-8 w-full py-3 bg-[#f5c842] text-[#2c4a1e] rounded-full font-bold text-sm hover:bg-yellow-400 transition-all inline-block text-center">
+          <Link href="/trips" className="mt-8 w-full py-3 bg-[#f5c842] text-[#2c4a1e] rounded-full font-bold text-sm hover:bg-yellow-400 transition-all inline-block text-center">
             Start Sending →
           </Link>
         </div>

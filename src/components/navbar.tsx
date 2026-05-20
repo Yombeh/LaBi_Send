@@ -1,15 +1,48 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronDown, HelpCircle, Shield, Lock, FileText, Phone } from "lucide-react"
+import { createClient } from "@/lib/supabase"
 
 export default function Navbar() {
-    const [supportOpen, setSupportOpen] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
+  const [user, setUser] = useState<{ name: string; role: string } | null>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient()
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, role")
+          .eq("id", authUser.id)
+          .single()
+
+        if (profile) {
+          setUser({
+            name: profile.full_name || "User",
+            role: profile.role
+          })
+        }
+      }
+    }
+
+    fetchUser()
+  }, [])
+
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setUser(null)
+    window.location.href = "/"
+  }
 
   return (
     <nav className="absolute top-0 left-0 w-full px-10 py-5 flex items-center justify-between z-10">
-      
+
       {/* Logo */}
       <Link href="/" className="text-3xl font-extrabold text-white tracking-wide">
         LaBi<span className="text-[#f5c842]">_Send</span>
@@ -17,23 +50,45 @@ export default function Navbar() {
 
       {/* Nav Links */}
       <div className="flex items-center gap-8 text-white text-base font-semibold">
-        
-        <Link href="/" className="hover:text-[#f5c842] transition-colors">
-          Home
+
+        <Link href="/dashboard/customer/bookings" className="hover:text-[#f5c842] transition-colors">
+          Bookings
         </Link>
-        <Link href="/about" className="hover:text-[#f5c842] transition-colors">
+         
+          <Link href="/about" className="hover:text-[#f5c842] transition-colors">
           About
-        </Link>
+        </Link> 
 
         <Link href="/trips" className="hover:text-[#f5c842] transition-colors">
           Find Travelers
         </Link>
-        
-        <Link href="/become-traveller" className="hover:text-[#f5c842] transition-colors">
-          Become Traveler
-        </Link>
 
-    
+
+       
+
+        {/* Traveler only */}
+        {user?.role === "traveler" && (
+          <Link href="/alltrips/new" className="text-[#f5c842] font-bold hover:text-yellow-300 transition-colors">
+            ✈️ List a Trip
+          </Link>
+          
+        )}
+
+        
+        {/* Traveler only */}
+        {user?.role === "traveler" && (
+          <Link href="/become-traveller/customer-list" className="text-[#f5c842] font-bold hover:text-yellow-300 transition-colors">
+            ✈️ My Trip
+          </Link>
+          
+        )}
+
+        {/* Admin only */}
+        {user?.role === "admin" && (
+          <Link href="/admin" className="text-[#f5c842] font-bold hover:text-yellow-300 transition-colors">
+            🛡️ Admin Panel
+          </Link>
+        )}
 
         {/* Support Dropdown */}
         <div className="relative">
@@ -42,9 +97,9 @@ export default function Navbar() {
             className="flex items-center gap-1 hover:text-[#f5c842] transition-colors"
           >
             Support
-            <ChevronDown 
-              size={16} 
-              className={`transition-transform ${supportOpen ? "rotate-180" : ""}`} 
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${supportOpen ? "rotate-180" : ""}`}
             />
           </button>
 
@@ -76,15 +131,35 @@ export default function Navbar() {
 
       </div>
 
-      {/* Right Buttons */}
+      {/* Right Side */}
       <div className="flex items-center gap-4">
-        <Link
-    href="/auth"
-    className="px-6 py-2 border-2 border-white text-white rounded-full text-base font-bold hover:bg-[#f5c842] hover:text-[#2c4a1e] hover:border-[#f5c842] transition-all"
-  >
-    Login / Sign Up
-  </Link>
-      
+
+        {user ? (
+          /* Logged in */
+          <>
+            <span className="text-white text-base font-bold">
+              Welcome, {user.name.split(" ")[0]}
+            </span>
+            <button
+              onClick={handleSignOut}
+              className="px-6 py-2 border-2 border-white text-white rounded-full text-base font-bold hover:bg-red-500 hover:border-red-500 transition-all"
+            >
+              Sign Out
+            </button>
+          </>
+        ) : (
+          /* Not logged in */
+          <>
+            <Link
+              href="/auth"
+              className="px-6 py-2 border-2 border-white text-white rounded-full text-base font-bold hover:bg-[#f5c842] hover:text-[#2c4a1e] hover:border-[#f5c842] transition-all"
+            >
+              Login / Sign Up
+            </Link>
+       
+          </>
+        )}
+
       </div>
     </nav>
   )
