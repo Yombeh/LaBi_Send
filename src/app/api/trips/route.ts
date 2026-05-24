@@ -19,11 +19,20 @@ export async function GET() {
     (data || []).map(async (trip) => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, phone_number, address")
+        .select("full_name, phone_number, address,profile_photo_url")
         .eq("id", trip.traveler_id)
         .single()
 
-      return { ...trip, profiles: profile }
+         const { data: travelerDetails } = await supabase
+      .from("traveler_details")
+      .select("profile_photo_url")
+      .eq("profile_id", trip.traveler_id)
+      .single()
+
+      return {
+      ...trip,
+      profiles: { ...profile, profile_photo_url: travelerDetails?.profile_photo_url }
+    }
     })
   )
 

@@ -14,11 +14,27 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("applications")
   const [updating, setUpdating] = useState(false)
+  const [contacts, setContacts] = useState<any[]>([])
+  const [selectedContact, setSelectedContact] = useState<any | null>(null)
 
-  useEffect(() => {
+useEffect(() => {
+  const checkAdmin = async () => {
+    const response = await fetch("/api/profiles")
+    if (!response.ok) {
+      window.location.href = "/auth"
+      return
+    }
+    const profile = await response.json()
+    if (profile.role !== "admin") {
+      window.location.href = "/unauthorized"
+      return
+    }
     fetchApplications()
     fetchTrips()
-  }, [])
+    fetchContacts()
+  }
+  checkAdmin()
+}, [])
 
   const fetchApplications = async () => {
     setLoading(true)
@@ -27,7 +43,11 @@ export default function AdminPage() {
     setApplications(data || [])
     setLoading(false)
   }
-
+ const fetchContacts = async () => {
+  const response = await fetch("/api/contact")
+  const data = await response.json()
+  setContacts(data || [])
+}
   const fetchTrips = async () => {
     const response = await fetch("/api/admin/trips")
     const data = await response.json()
@@ -123,7 +143,7 @@ export default function AdminPage() {
       <div className="flex min-h-screen">
 
         {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-100 p-6 shrink-0">
+        <aside className="w-64 bg-white border-r border-gray-200 p-6 shrink-0">
 
           {/* Tab Switch */}
           <div className="flex gap-2 mb-6">
@@ -145,8 +165,9 @@ export default function AdminPage() {
                   : "bg-gray-100 text-gray-500"
               }`}
             >
-              Trips
+              New Trips
             </button>
+ 
           </div>
 
           {/* Application Filters */}
@@ -238,6 +259,24 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+           {/* contact tab */}
+          <div>. </div>
+             <button
+    onClick={() => setActiveTab("contacts")}
+    className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
+      activeTab === "contacts"
+        ? "bg-[#2c4a1e] text-white"
+        : "bg-gray-100 text-gray-500"
+    }`}
+  >
+    Contact Messages
+    {contacts.filter(c => c.status === "unread").length > 0 && (
+      <span className="ml-2 px-2 py-0.5 bg-red-500 text-white rounded-full text-xs">
+        {contacts.filter(c => c.status === "unread").length}
+      </span>
+    )}
+  </button>
+
         </aside>
 
         {/* Main Content */}
@@ -247,14 +286,18 @@ export default function AdminPage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-extrabold text-[#2c4a1e]">
-                {activeTab === "applications" ? "Traveler Applications" : "Trip Listings"}
-              </h2>
-              <p className="text-gray-400 text-sm mt-1">
-                {activeTab === "applications"
-                  ? "Review and manage all traveler applications"
-                  : "Review and approve traveler trip listings"
-                }
-              </p>
+  {activeTab === "applications" ? "Traveler Applications" : 
+   activeTab === "trips" ? "Trip Listings" : 
+   "Contact Messages"}
+</h2>
+<p className="text-gray-400 text-sm mt-1">
+  {activeTab === "applications"
+    ? "Review and manage all traveler applications"
+    : activeTab === "trips"
+    ? "Review and approve traveler trip listings"
+    : "Messages from users via the contact form"
+  }
+</p>
             </div>
           </div>
 
@@ -352,7 +395,7 @@ export default function AdminPage() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[#2c4a1e]">
-                    {["Traveler", "Route", "Date", "KG", "Price/KG", "Status", "Action"].map(h => (
+                    {["Traveler", "Route", "Date", "KG", "Price/KG", "Action"].map(h => (
                       <th key={h} className="px-6 py-4 text-left text-xs font-bold text-green-200 uppercase tracking-widest">
                         {h}
                       </th>
@@ -400,11 +443,7 @@ export default function AdminPage() {
                         <td className="px-6 py-4">
                           <p className="text-sm text-gray-600">D{trip.price_per_kg}</p>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${statusStyle(trip.status)}`}>
-                            {trip.status}
-                          </span>
-                        </td>
+                      
                         <td className="px-6 py-4">
                           <button
                             onClick={() => setSelectedTrip(trip)}
@@ -421,6 +460,74 @@ export default function AdminPage() {
               </table>
             </div>
           )}
+
+          {/* Contacts Table */}
+{activeTab === "contacts" && (
+  <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <table className="w-full">
+      <thead>
+        <tr className="bg-[#2c4a1e]">
+          {["Name", "Email", "Subject", "Date", "Status", "Action"].map(h => (
+            <th key={h} className="px-6 py-4 text-left text-xs font-bold text-green-200 uppercase tracking-widest">
+              {h}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {contacts.length === 0 ? (
+          <tr>
+            <td colSpan={6} className="text-center py-16 text-gray-400 text-sm">
+              No contact messages yet
+            </td>
+          </tr>
+        ) : (
+          contacts.map((contact, index) => (
+            <tr
+              key={contact.id}
+              className={`border-b border-gray-50 hover:bg-[#fdfaf7] transition-colors ${
+                index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+              }`}
+            >
+              <td className="px-6 py-4">
+                <p className="font-semibold text-[#2c2c2c] text-sm">{contact.name}</p>
+              </td>
+              <td className="px-6 py-4">
+                <p className="text-sm text-gray-600">{contact.email}</p>
+              </td>
+              <td className="px-6 py-4">
+                <p className="text-sm text-gray-600">{contact.subject || "General"}</p>
+              </td>
+              <td className="px-6 py-4">
+                <p className="text-xs text-gray-400">
+                  {new Date(contact.created_at).toLocaleDateString()}
+                </p>
+              </td>
+              <td className="px-6 py-4">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  contact.status === "unread" 
+                    ? "bg-red-100 text-red-700" 
+                    : "bg-green-100 text-green-700"
+                }`}>
+                  {contact.status}
+                </span>
+              </td>
+              <td className="px-6 py-4">
+                <button
+                  onClick={() => setSelectedContact(contact)}
+                  className="flex items-center gap-1 px-4 py-2 bg-[#2c4a1e] text-white rounded-full text-xs font-bold hover:bg-green-800 transition-all"
+                >
+                  <Eye size={12} />
+                  View
+                </button>
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+)}
         </div>
       </div>
 
@@ -460,7 +567,17 @@ export default function AdminPage() {
                   Current Status: {selected.status}
                 </span>
               </div>
-
+              {/* Profile Photo */}
+              {selected.profile_photo_url && (
+               <div className="flex justify-center">
+              <img
+                src={selected.profile_photo_url}
+                       alt="Profile Photo"
+                       className="w-24 h-24 rounded-2xl object-cover border-4 border-[#f5c842]"
+                       />
+                          </div>
+                             )}
+             
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { label: "Full Name", value: selected.profiles?.full_name },
@@ -529,7 +646,6 @@ export default function AdminPage() {
                   Deny
                 </button>
               </div>
-
             </div>
           </div>
         </div>
@@ -564,11 +680,7 @@ export default function AdminPage() {
 
             <div className="p-6 flex flex-col gap-4">
 
-              <div className="flex justify-center">
-                <span className={`px-4 py-2 rounded-full text-sm font-bold capitalize ${statusStyle(selectedTrip.status)}`}>
-                  Current Status: {selectedTrip.status}
-                </span>
-              </div>
+              
 
               <div className="grid grid-cols-2 gap-4">
                 {[
@@ -651,7 +763,54 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+     {/* Contact Detail Modal */}
+{selectedContact && (
+  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
+    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg">
+      
+      <div className="bg-[#2c4a1e] rounded-t-3xl p-6 flex items-center justify-between">
+        <div>
+          <h3 className="text-white font-extrabold text-lg">{selectedContact.name}</h3>
+          <p className="text-green-300 text-xs">{selectedContact.email}</p>
+        </div>
+        <button
+          onClick={() => setSelectedContact(null)}
+          className="text-green-300 hover:text-white text-xl font-bold"
+        >
+          ✕
+        </button>
+      </div>
 
+      <div className="p-6 flex flex-col gap-4">
+        <div className="bg-[#fdfaf7] rounded-xl p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Subject</p>
+          <p className="text-sm font-semibold text-[#2c2c2c]">{selectedContact.subject || "General Inquiry"}</p>
+        </div>
+        <div className="bg-[#fdfaf7] rounded-xl p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Message</p>
+          <p className="text-sm text-gray-600 leading-relaxed">{selectedContact.message}</p>
+        </div>
+        <div className="bg-[#fdfaf7] rounded-xl p-4">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Received</p>
+          <p className="text-sm text-gray-600">{new Date(selectedContact.created_at).toLocaleString()}</p>
+        </div>
+        <a
+          href={`mailto:${selectedContact.email}`}
+          className="w-full py-3 bg-[#2c4a1e] text-white rounded-xl font-bold text-sm text-center hover:bg-green-800 transition-all"
+        >
+          Reply via Email
+        </a>
+        <button
+          onClick={() => setSelectedContact(null)}
+          className="w-full py-3 border-2 border-gray-200 text-gray-500 rounded-xl font-bold text-sm"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+     
     </main>
   )
 }

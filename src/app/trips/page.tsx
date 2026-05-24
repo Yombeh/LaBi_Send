@@ -153,30 +153,42 @@ const searchParams = useSearchParams()
                   href={`/trips/${trip.id}`}
                   className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all overflow-hidden border border-gray-100 group"
                 >
-                  {/* Card Header */}
-                  <div className="bg-[#2c4a1e] p-5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-[#f5c842] flex items-center justify-center border-2 border-[#f5c842] shrink-0">
-                        <span className="text-[#2c4a1e] font-extrabold text-lg">
-                          {trip.profiles?.full_name?.charAt(0) || "?"}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-extrabold text-white text-sm">
-                          {trip.profiles?.full_name || "Unknown"}
-                        </p>
-                        <div className="flex items-center gap-1">
-                          <Star size={12} color="#f5c842" fill="#f5c842" />
-                          <span className="text-[#f5c842] text-xs font-bold">5.0</span>
-                          <span className="text-green-300 text-xs">· Verified ✓</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[#f5c842] font-extrabold text-lg">D{trip.price_per_kg}</p>
-                      <p className="text-green-300 text-xs">per KG</p>
-                    </div>
-                  </div>
+ {/* Card Header */}
+<div className="bg-[#2c4a1e] p-5 flex items-center justify-between">
+  <div className="flex items-center gap-3">
+    {trip.profiles?.profile_photo_url ? (
+      <img
+        src={trip.profiles.profile_photo_url}
+        alt={trip.profiles?.full_name}
+        className="w-12 h-12 rounded-full border-2 border-[#f5c842] object-cover shrink-0"
+      />
+    ) : (
+      <div className="w-12 h-12 rounded-full bg-[#f5c842] flex items-center justify-center border-2 border-[#f5c842] shrink-0">
+        <span className="text-[#2c4a1e] font-extrabold text-lg">
+          {trip.profiles?.full_name?.charAt(0) || "?"}
+        </span>
+      </div>
+    )}
+
+    <div>
+      <p className="font-extrabold text-white text-sm">
+        {trip.profiles?.full_name || "Unknown"}
+      </p>
+      <div className="flex items-center gap-1">
+        <Star size={12} color="#f5c842" fill="#f5c842" />
+        <span className="text-[#f5c842] text-xs font-bold">5.0</span>
+        <span className="text-green-300 text-xs">· Verified ✓</span>
+      </div>
+    </div>
+  </div>
+
+  <div className="text-right">
+    <p className="text-[#f5c842] font-extrabold text-lg">
+      D{trip.price_per_kg}
+    </p>
+    <p className="text-green-300 text-xs">per KG</p>
+  </div>
+</div>
 
                   {/* Card Body */}
                   <div className="p-5 flex flex-col gap-4">

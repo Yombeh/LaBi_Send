@@ -18,11 +18,19 @@ export default function ContactPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = () => {
-    if (formData.name && formData.email && formData.message) {
-      setSubmitted(true)
-    }
+ const handleSubmit = async () => {
+  if (!formData.name || !formData.email || !formData.message) return
+
+  const response = await fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(formData)
+  })
+
+  if (response.ok) {
+    setSubmitted(true)
   }
+}
 
   return (
     <main className="min-h-screen bg-[#fdfaf7]">

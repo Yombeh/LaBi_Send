@@ -17,6 +17,9 @@ export default function BecomeTravelerPage() {
   const [error, setError] = useState("")
   const [user, setUser] = useState<{ id: string; name: string } | null>(null)
   const [alreadyApplied, setAlreadyApplied] = useState(false)
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null)
+  const [profilePhotoName, setProfilePhotoName] = useState("")
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null)
 
   useEffect(() => {
     const checkUser = async () => {
@@ -55,7 +58,17 @@ export default function BecomeTravelerPage() {
 
     checkUser()
   }, [])
-
+  const handleProfilePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0]
+    setProfilePhoto(file)
+    setProfilePhotoName(file.name)
+    // Create preview
+    const reader = new FileReader()
+    reader.onload = () => setProfilePhotoPreview(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+}
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selected = e.target.files[0]
@@ -72,76 +85,92 @@ export default function BecomeTravelerPage() {
     }
   }
 
-  const handleSubmit = async () => {
-    setError("")
+const handleSubmit = async () => {
+  setError("")
 
-    if (!user) {
-      setError("You must be logged in to apply.")
-      return
-    }
-
-    if (!file) {
-      setError("Please upload your ID or passport document.")
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const supabase = createClient()
-
-      // Step 1 — Upload file to Supabase Storage
-      const fileExt = file.name.split(".").pop()
-      const filePath = `${user.id}-${Date.now()}.${fileExt}`
-
-   const { error: uploadError } = await supabase.storage
-  .from("traveller-documents")
-  .upload(filePath, file)
-
-console.log("Upload error:", uploadError)
-console.log("Upload file:", file)
-console.log("Upload path:", filePath)
-
-if (uploadError) {
-  setError(uploadError.message)
-  setLoading(false)
-  return
-}
-
-      // Step 2 — Get the public URL
-      const { data: urlData } = supabase.storage
-        .from("traveller-documents")
-        .getPublicUrl(filePath)
-
-      const documentUrl = urlData.publicUrl
-
-      // Step 3 — Save to traveler_details table
-      const { error: dbError } = await supabase
-  .from("traveler_details")
-  .insert({
-    profile_id: user.id,
-    id_document_url: documentUrl,
-    status: "pending"
-  })
-
-console.log("DB error:", dbError)
-console.log("User ID:", user.id)
-console.log("Document URL:", documentUrl)
-
-if (dbError) {
-  setError(dbError.message)
-  setLoading(false)
-  return
-}
-
-      setSubmitted(true)
-
-    } catch {
-      setError("Something went wrong. Please try again.")
-    }
-
-    setLoading(false)
+  if (!user) {
+    setError("You must be logged in to apply.")
+    return
   }
+
+  if (!file) {
+    setError("Please upload your ID or passport document.")
+    return
+  }
+
+  setLoading(true)
+
+  try {
+    const supabase = createClient()
+
+    // Step 1 — Upload ID document
+    const fileExt = file.name.split(".").pop()
+    const filePath = `${user.id}-${Date.now()}.${fileExt}`
+
+    const { error: uploadError } = await supabase.storage
+      .from("traveller-documents")
+      .upload(filePath, file)
+
+    if (uploadError) {
+      setError(uploadError.message)
+      setLoading(false)
+      return
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("traveller-documents")
+      .getPublicUrl(filePath)
+
+    const documentUrl = urlData.publicUrl
+
+    // Step 2 — Upload profile photo if provided
+    let profilePhotoUrl = null
+
+    if (profilePhoto) {
+      const photoExt = profilePhoto.name.split(".").pop()
+      const photoPath = `profile-${user.id}-${Date.now()}.${photoExt}`
+
+      const { error: photoUploadError } = await supabase.storage
+        .from("traveller-documents")
+        .upload(photoPath, profilePhoto)
+
+      if (photoUploadError) {
+        setError(photoUploadError.message)
+        setLoading(false)
+        return
+      }
+
+      const { data: photoUrlData } = supabase.storage
+        .from("traveller-documents")
+        .getPublicUrl(photoPath)
+
+      profilePhotoUrl = photoUrlData.publicUrl
+    }
+
+    // Step 3 — Save to traveler_details table
+    const { error: dbError } = await supabase
+      .from("traveler_details")
+      .insert({
+        profile_id: user.id,
+        id_document_url: documentUrl,
+        profile_photo_url: profilePhotoUrl,
+        status: "pending"
+      })
+
+    if (dbError) {
+      setError(dbError.message)
+      setLoading(false)
+      return
+    }
+
+    setSubmitted(true)
+
+  } catch {
+    setError("Something went wrong. Please try again.")
+  }
+
+  setLoading(false)
+}
 
   return (
     <main className="min-h-screen bg-[#fdfaf7]">
@@ -219,7 +248,39 @@ if (dbError) {
                   </p>
                 </div>
               )}
-
+              {/* Profile Photo */}
+     <div>
+     <label className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 block">
+    Profile Photo
+    </label>
+    <div className="flex items-center gap-6">
+    {/* Preview */}
+     <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 flex items-center justify-center bg-[#fdfaf7] shrink-0">
+      {profilePhotoPreview ? (
+        <img
+          src={profilePhotoPreview}
+          alt="Profile preview"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span className="text-gray-300 text-3xl">👤</span>
+      )}
+     </div>
+     {/* Upload */}
+    <label className="flex-1 flex flex-col items-center justify-center px-4 py-6 rounded-xl border-2 border-dashed border-gray-200 cursor-pointer hover:border-[#2c4a1e] transition-colors">
+      <p className="text-sm font-semibold text-[#2c4a1e]">
+        {profilePhotoName || "Click to upload profile photo"}
+      </p>
+      <p className="text-xs text-gray-400 mt-1">PNG or JPG up to 5MB</p>
+      <input
+        type="file"
+        accept=".png,.jpg,.jpeg"
+        onChange={handleProfilePhoto}
+        className="hidden"
+      />
+    </label>
+  </div>
+</div>
               {/* File Upload */}
               <div className="mb-6">
                 <label className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 block">

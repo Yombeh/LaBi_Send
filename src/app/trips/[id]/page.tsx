@@ -30,29 +30,37 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
   }, [])
  
   const fetchTrip = async () => {
-    const supabase = createClient()
+  const supabase = createClient()
 
- const { data, error } = await supabase
-  .from("trips")
-  .select("*")
-  .eq("id", id)
-  .single()
+  const { data, error } = await supabase
+    .from("trips")
+    .select("*")
+    .eq("id", id)
+    .single()
 
-    if (error) {
-      console.log("Error:", error)
-      setLoading(false)
-      return
-    }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, phone_number, address")
-      .eq("id", data.traveler_id)
-      .single()
-
-    setTrip({ ...data, profiles: profile })
+  if (error) {
+    console.log("Error:", error)
     setLoading(false)
+    return
   }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, phone_number, address")
+    .eq("id", data.traveler_id)
+    .single()
+
+  // Fetch traveler_details for profile photo
+  const { data: travelerDetails } = await supabase
+    .from("traveler_details")
+    .select("profile_photo_url")
+    .eq("profile_id", data.traveler_id)
+    .single()
+
+  setTrip({ ...data, profiles: profile, traveler_details: travelerDetails })
+  setLoading(false)
+}
+
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -186,11 +194,20 @@ export default function TripDetailPage({ params }: { params: Promise<{ id: strin
             <div className="bg-white rounded-3xl shadow-sm p-8">
               <div className="flex items-start gap-6">
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-2xl bg-[#2c4a1e] flex items-center justify-center border-4 border-[#f5c842]">
-                    <span className="text-white font-extrabold text-4xl">
-                      {trip.profiles?.full_name?.charAt(0) || "?"}
-                    </span>
-                  </div>
+                  {trip.traveler_details?.profile_photo_url ? (
+  <img
+    src={trip.traveler_details.profile_photo_url}
+    alt={trip.profiles?.full_name || "Traveler"}
+    className="w-24 h-24 rounded-2xl object-cover border-4 border-[#f5c842]"
+  />
+) : (
+  <div className="w-24 h-24 rounded-2xl bg-[#2c4a1e] flex items-center justify-center border-4 border-[#f5c842]">
+    <span className="text-white font-extrabold text-4xl">
+      {trip.profiles?.full_name?.charAt(0) || "?"}
+    </span>
+  </div>
+)}
+
                   <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-[#2c4a1e] flex items-center justify-center">
                     <Shield size={14} color="white" />
                   </div>
