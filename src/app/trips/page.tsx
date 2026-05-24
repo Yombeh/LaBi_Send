@@ -7,8 +7,9 @@ import Link from "next/link"
 import { MapPin, Calendar, Package, Star } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
-export default function TripsPage() {
+      function TripsContent() {
 const searchParams = useSearchParams()
   const [trips, setTrips] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -230,5 +231,13 @@ const searchParams = useSearchParams()
 
       <Footer />
     </main>
+  )
+}
+
+export default function TripsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#fdfaf7] flex items-center justify-center"><p className="text-gray-400">Loading...</p></div>}>
+      <TripsContent />
+    </Suspense>
   )
 }
