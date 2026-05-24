@@ -181,8 +181,7 @@ const handleWavePayment = async (booking: any) => {
         <div className="max-w-4xl mx-auto flex gap-6 border-b border-gray-200">
           {[
             { label: "My Bookings", value: "bookings" },
-            { label: "Wave Transactions", value: "wave" },
-            { label: "ModemPay Transactions", value: "modempay" },
+           
           ].map((tab) => (
             <button
               key={tab.value}
@@ -303,18 +302,12 @@ const handleWavePayment = async (booking: any) => {
                           <div className="grid grid-cols-2 gap-3">
                             <button
                               onClick={() => setWaveModal(booking)}
-                              className="flex items-center justify-center gap-2 py-4 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all"
+                              className="flex items-center justify-center gap-2 py-4 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 "
                             >
                               <CreditCard size={18} />
                               Pay via Wave
                             </button>
-                            <button
-                              onClick={() => setModempayModal(booking)}
-                              className="flex items-center justify-center gap-2 py-4 bg-[#2c4a1e] text-white rounded-xl font-bold text-sm hover:bg-green-800 transition-all"
-                            >
-                              <CreditCard size={18} />
-                              Pay via ModemPay
-                            </button>
+                         
                           </div>
                         </div>
                       )}
@@ -484,53 +477,6 @@ const handleWavePayment = async (booking: any) => {
             </div>
           )}
 
-          {/* ModemPay Transactions Tab */}
-          {activeTab === "modempay" && (
-            <div className="flex flex-col gap-4">
-              <div className="bg-[#2c4a1e] rounded-2xl p-6 text-white flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-[#f5c842] flex items-center justify-center">
-                  <span className="text-[#2c4a1e] font-extrabold text-xl">M</span>
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-xl">ModemPay Transactions</h3>
-                  <p className="text-green-300 text-sm">
-                    {transactions.filter(t => t.payment_method === "modempay").length} transactions
-                  </p>
-                </div>
-              </div>
-
-              {transactions.filter(t => t.payment_method === "modempay").length === 0 ? (
-                <div className="bg-white rounded-2xl p-10 text-center">
-                  <p className="text-gray-400 text-sm">No ModemPay transactions yet</p>
-                </div>
-              ) : (
-                transactions.filter(t => t.payment_method === "modempay").map((tx) => (
-                  <div key={tx.id} className="bg-white rounded-2xl shadow-sm p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                        <span className="text-[#2c4a1e] font-extrabold">M</span>
-                      </div>
-                      <div>
-                        <p className="font-extrabold text-[#2c2c2c]">{tx.traveler?.full_name || "Unknown"}</p>
-                        <p className="text-gray-400 text-xs">{tx.trip?.from_city} → {tx.trip?.to_city}</p>
-                        <p className="text-gray-400 text-xs">{new Date(tx.created_at).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-extrabold text-[#2c4a1e] text-lg">D{tx.amount}</p>
-                      <button
-                        onClick={() => setReceiptModal({ ...tx.booking, trip: tx.trip, traveler: tx.traveler, payment_method: "modempay", transaction_ref: tx.transaction_ref })}
-                        className="text-xs text-[#2c4a1e] font-bold hover:underline"
-                      >
-                        View Receipt
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
         </div>
       </section>
 
@@ -592,115 +538,6 @@ const handleWavePayment = async (booking: any) => {
         </div>
       )}
 
-      {/* ModemPay Modal */}
-      {modempayModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
-            <div className="bg-[#2c4a1e] p-6 text-center">
-              <div className="w-16 h-16 rounded-full bg-[#f5c842] flex items-center justify-center mx-auto mb-3">
-                <span className="text-[#2c4a1e] font-extrabold text-2xl">M</span>
-              </div>
-              <h3 className="text-white font-extrabold text-xl">ModemPay</h3>
-              <p className="text-green-300 text-sm">Digital Wallet</p>
-            </div>
-
-            <div className="p-6 flex flex-col gap-4">
-              <div className="bg-green-50 rounded-xl p-4 text-center">
-                <p className="text-[#2c4a1e] text-xs font-bold uppercase mb-1">Amount to Pay</p>
-                <p className="text-3xl font-extrabold text-[#2c4a1e]">
-                  D{modempayModal.kg_requested * modempayModal.trip?.price_per_kg}
-                </p>
-                <p className="text-green-400 text-xs">To: LaBi_Send</p>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 block">
-                  ModemPay Wallet ID
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter your Wallet ID"
-                  value={modempayWallet}
-                  onChange={(e) => setModempayWallet(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#2c4a1e] transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 block">
-                  PIN
-                </label>
-                <input
-                  type="password"
-                  placeholder="Enter your ModemPay PIN"
-                  value={modempayPin}
-                  onChange={(e) => setModempayPin(e.target.value)}
-                  maxLength={4}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#2c4a1e] transition-colors"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => { setModempayModal(null); setModempayWallet(""); setModempayPin("") }}
-                  className="py-3 border-2 border-gray-200 text-gray-500 rounded-xl font-bold text-sm"
-                >
-                  Cancel
-                </button>
-              
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Receipt Modal */}
-      {receiptModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
-            <div className={`p-6 text-center ${receiptModal.payment_method === "wave" ? "bg-blue-600" : "bg-[#2c4a1e]"}`}>
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 ${receiptModal.payment_method === "wave" ? "bg-white" : "bg-[#f5c842]"}`}>
-                <span className={`font-extrabold text-2xl ${receiptModal.payment_method === "wave" ? "text-blue-600" : "text-[#2c4a1e]"}`}>
-                  {receiptModal.payment_method === "wave" ? "W" : "M"}
-                </span>
-              </div>
-              <h3 className="text-white font-extrabold text-xl">Payment Receipt</h3>
-              <p className="text-white/70 text-xs mt-1">
-                {receiptModal.payment_method === "wave" ? "Wave Mobile Money" : "ModemPay Wallet"}
-              </p>
-            </div>
-
-            <div className="p-6 flex flex-col gap-4">
-              <div className="flex flex-col gap-3">
-                {[
-                  { label: "Transaction ID", value: receiptModal.transaction_ref || `LBS-${receiptModal.id?.slice(0, 8).toUpperCase()}` },
-                  { label: "Traveler", value: receiptModal.traveler?.full_name || "Unknown" },
-                  { label: "Route", value: `${receiptModal.trip?.from_city} → ${receiptModal.trip?.to_city}` },
-                  { label: "Amount Paid", value: `D${receiptModal.kg_requested * receiptModal.trip?.price_per_kg}` },
-                  { label: "Payment Method", value: receiptModal.payment_method === "wave" ? "Wave Mobile Money" : "ModemPay Wallet" },
-                  { label: "Status", value: "✅ Confirmed" },
-                ].map((item) => (
-                  <div key={item.label} className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-400 text-xs font-bold uppercase tracking-widest">{item.label}</span>
-                    <span className="text-[#2c2c2c] text-sm font-semibold">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <p className="text-center text-gray-400 text-xs">
-                Show this receipt to your traveler as proof of payment
-              </p>
-
-              <button
-                onClick={() => setReceiptModal(null)}
-                className="w-full py-3 bg-[#2c4a1e] text-white rounded-xl font-bold text-sm"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Rating Modal */}
       {ratingModal && (

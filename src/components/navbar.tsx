@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { ChevronDown, HelpCircle, Shield, Lock, FileText, Phone } from "lucide-react"
+import { ChevronDown, HelpCircle, Shield, Lock, FileText, Phone, Rocket } from "lucide-react"
 import { createClient } from "@/lib/supabase"
 
 export default function Navbar() {
@@ -111,6 +111,7 @@ export default function Navbar() {
                 { label: "Privacy Policy", href: "/privacy", icon: Lock },
                 { label: "Terms of Service", href: "/terms", icon: FileText },
                 { label: "Contact Us", href: "/contact", icon: Phone },
+                { label: "Plan", href: "/future", icon: Rocket },
               ].map((item) => {
                 const Icon = item.icon
                 return (
